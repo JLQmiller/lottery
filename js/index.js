@@ -1,12 +1,12 @@
 // 自定义抽奖弹窗组件
 const CustomLuckyDrawDrawer = {
-  data () {
+  data() {
     return {
       // 显示状态
       visible: false,
       // 自定义列表
-      customs: []
-    }
+      customs: [],
+    };
   },
   template: `
     <a-drawer
@@ -59,47 +59,47 @@ const CustomLuckyDrawDrawer = {
   `,
   methods: {
     // 显示抽屉
-    showDrawer () {
+    showDrawer() {
       // 获取自定义列表
-      this.customs = JSON.parse(localStorage.getItem('customs')) || []
+      this.customs = JSON.parse(localStorage.getItem('customs')) || [];
       // 显示
-      this.visible = true
+      this.visible = true;
     },
     // 关闭抽屉
-    onClose () {
+    onClose() {
       // 过滤空名称奖项
-      const customs = this.customs.filter(item => {
-        return !!item.name
-      })
+      const customs = this.customs.filter((item) => {
+        return !!item.name;
+      });
       // 转成 json
-      const jsonString = JSON.stringify(customs)
+      const jsonString = JSON.stringify(customs);
       // 存储到 localStorage
-      localStorage.setItem('customs', jsonString)
+      localStorage.setItem('customs', jsonString);
       // 关闭窗口
-      this.visible = false
+      this.visible = false;
       // 回调
-      this.$emit('close')
+      this.$emit('close');
     },
     // 新增
-    touchAdd () {
+    touchAdd() {
       const custom = {
         name: undefined,
-        tag: undefined
-      }
-      this.customs.push(custom)
+        tag: undefined,
+      };
+      this.customs.push(custom);
     },
     // 删除
-    touchDelete (index) {
-      this.customs.splice(index, 1)
-    }
-  }
-}
+    touchDelete(index) {
+      this.customs.splice(index, 1);
+    },
+  },
+};
 
 // 主视图
 new Vue({
   el: '#app',
   components: {
-    CustomLuckyDrawDrawer
+    CustomLuckyDrawDrawer,
   },
   template: `
     <div class="import-view">
@@ -168,14 +168,21 @@ new Vue({
         清空所有数据
         <a-icon type="reload" />
       </a-button>
+      <a-button
+        class="operation-button"
+        @click="fullScreen"
+      >
+        全屏模式
+      </a-button>
       <!-- 提示 -->
       <span class="import-hint">小提示：上传名单只支持 .xlsx、.xls、.csv 文件格式，纯名单即可！已中奖用户不会重复中奖！</span>
       <!-- 自定义抽奖组件 -->
       <custom-lucky-draw-drawer ref="custom-lucky-draw-drawer" @close="onCloseCustom"></custom-lucky-draw-drawer>
     </div>
   `,
-  data () {
+  data() {
     return {
+      fullScreen: false,
       // 0 默认抽奖模式，1 自定义抽奖模式
       modeType: 0,
       // 上传文件列表
@@ -187,137 +194,142 @@ new Vue({
       // 是否导入了用户列表
       isImportUsers: false,
       // 是否有自定义奖项配置
-      isImportMode: false
-    }
+      isImportMode: false,
+    };
   },
-  created () {
+  created() {
     // 获取抽奖模式
-    const modeType = localStorage.getItem('modeType')
+    const modeType = localStorage.getItem('modeType');
     if (modeType) {
-      this.modeType = Number(modeType)
+      this.modeType = Number(modeType);
     } else {
-      this.modeType = 0
+      this.modeType = 0;
     }
     // 获取抽奖用户
-    const users = localStorage.getItem('users')
-    this.isImportUsers = users ? JSON.parse(users).length : false
+    const users = localStorage.getItem('users');
+    this.isImportUsers = users ? JSON.parse(users).length : false;
     // 获取自定义抽奖项
-    this.onCloseCustom()
+    this.onCloseCustom();
   },
   methods: {
+    // 全屏
+    fullScreen() {
+      this.fullScreen = true;
+      document.documentElement.requestFullscreen();
+    },
     // 跳转
-    touchLuckyDrawPage () {
-      window.location.href = './lucky-draw.html'
+    touchLuckyDrawPage() {
+      window.location.href = `./lucky-draw.html?full=${this.fullScreen}`;
     },
     // 抽奖模式切换
-    handleImportModeChange (e) {
+    handleImportModeChange(e) {
       // 存储到 localStorage
-      localStorage.setItem('modeType', e)
+      localStorage.setItem('modeType', e);
     },
     // 自定义抽奖组件
-    touchCustom () {
-      this.$refs["custom-lucky-draw-drawer"].showDrawer()
+    touchCustom() {
+      this.$refs['custom-lucky-draw-drawer'].showDrawer();
     },
     // 关闭自定义抽奖窗口
-    onCloseCustom () {
-      const customs = localStorage.getItem('customs')
-      this.isImportMode = customs ? JSON.parse(customs).length : false
+    onCloseCustom() {
+      const customs = localStorage.getItem('customs');
+      this.isImportMode = customs ? JSON.parse(customs).length : false;
     },
     // 清空数据
-    clearData () {
+    clearData() {
       // 清空数据
-      localStorage.clear()
+      localStorage.clear();
       // 清空状态
-      this.isImportUsers = false
-      this.isImportMode = false
-      this.modeType = 0
+      this.isImportUsers = false;
+      this.isImportMode = false;
+      this.modeType = 0;
       // 提示
-      this.$message.success('清理成功')
+      this.$message.success('清理成功');
     },
     // 上传之前检查
-    beforeUpload (file, fileList) {
-      return true
+    beforeUpload(file, fileList) {
+      return true;
     },
     // 自定义上传名单
-    customRequest (data) {
+    customRequest(data) {
       // 数据记录
-      this.users = []
+      this.users = [];
       // 进入加载
-      this.isLoading = true
+      this.isLoading = true;
       // 开始解析数据
       formJson(data.file, (code, sheets) => {
         // 解析成功且有数据
         if (code === 0) {
           // 解析数据
-          sheets.forEach(sheet => {
+          sheets.forEach((sheet) => {
             // 单个 sheet
-            sheet.list.forEach(row => {
+            sheet.list.forEach((row) => {
               // 单行
-              row.forEach(item => {
+              row.forEach((item) => {
                 // 每个单元格，解析成 user 对象存入数组
                 if (item.length) {
-                  const user = this.userJson(item)
-                  this.users.push(user)
+                  const user = this.userJson(item);
+                  this.users.push(user);
                 }
-              })
-            })
-          })
+              });
+            });
+          });
           // 解析成 JSON 字符串
-          const jsonString = JSON.stringify(this.users)
+          const jsonString = JSON.stringify(this.users);
           // 存储到 localStorage
-          localStorage.setItem('users', jsonString)
+          localStorage.setItem('users', jsonString);
           // 标记为有数据
-          this.isImportUsers = this.users.length
+          this.isImportUsers = this.users.length;
           // 名单是否为空
           if (this.users.length) {
             // 名单有值
-            this.$message.success('上传名单成功')
+            this.$message.success('上传名单成功');
           } else {
             // 名单为空
-            this.$message.error('上传名单是空的，打算抽空气么？')
+            this.$message.error('上传名单是空的，打算抽空气么？');
           }
           // 结束加载
-          this.isLoading = false
+          this.isLoading = false;
         } else {
           // 结束加载
-          this.isLoading = false
-          this.$message.success('上传名单失败')
+          this.isLoading = false;
+          this.$message.success('上传名单失败');
         }
-      })
+      });
     },
     // 获取单个用户数据，传入单元格字段
-    userJson (item) {
+    userJson(item) {
       // 分割字符串
-      const items = item.split('-')
+      const items = item.split('-');
       // 如果有3个字段
       if (items.length >= 3) {
         return {
           id: this.users.length,
           name: items[0],
           department: items[1],
-          number: items[2]
-        }
+          number: items[2],
+        };
       }
       // 如果有2个字段
       if (items.length >= 2) {
         // 判断第二个是否为数字
-        const isNumber = !isNaN(items[1])
+        const isNumber = !isNaN(items[1]);
         return {
           id: this.users.length,
           name: items[0],
           department: isNumber ? '' : items[1],
-          number: isNumber ? items[1] : 0
-        }
-      } 
+          number: isNumber ? items[1] : 0,
+        };
+      }
       // 如果有1个字段
       if (items.length >= 1) {
         return {
           id: this.users.length,
           name: items[0],
           department: '',
-          number: 0
-        }
+          number: 0,
+        };
       }
-    }
-  }
-})
+    },
+  },
+});
